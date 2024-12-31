@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TensorFlow.js Model Upload</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body>
+  <h1>Upload and Use TensorFlow.js Model</h1>
+  <input type="file" id="upload-json" accept=".json" />
+  <input type="file" id="upload-weights" accept=".bin" multiple />
+  <button id="load-model">Load Model</button>
+  <div id="output"></div>
+
+  <script>
+    let model;
+
+    document.getElementById("load-model").addEventListener("click", async () => {
+      const jsonFile = document.getElementById("upload-json").files[0];
+      const weightsFiles = Array.from(document.getElementById("upload-weights").files);
+
+      if (!jsonFile || weightsFiles.length === 0) {
+        alert("Please upload both the model JSON and weights files.");
+        return;
+      }
+
+      // Convert files into URLs for TensorFlow.js
+      const jsonURL = URL.createObjectURL(jsonFile);
+      const weightsURLs = weightsFiles.map(file => URL.createObjectURL(file));
+
+      try {
+        model = await tf.loadLayersModel(jsonURL, { weightPathPrefix: weightsURLs[0].replace(/[^/]+$/, "") });
+        document.getElementById("output").textContent = "Model successfully loaded!";
+      } catch (error) {
+        console.error("Error loading model:", error);
+        document.getElementById("output").textContent = "Failed to load the model.";
+      }
+    });
+  </script>
+</body>
+</html>
